@@ -10,6 +10,10 @@ class EventHandler(tcod.event.EventDispatch[Action]):
         raise SystemExit()
 
     def ev_keydown(self, event: tcod.event.KeyDown) -> Optional[Action]:
+        '''
+        Returns the appropriate Action type on key down, otherwise
+        returns None
+        '''
         action: Optional[Action] = None
 
         key = event.sym
@@ -45,5 +49,5 @@ class EventHandler(tcod.event.EventDispatch[Action]):
         elif key == tcod.event.K_ESCAPE:
             action = EscapeAction()
 
-        # No valid key was pressed
+        # return the action type (or None if not found here)
         return action

@@ -1,9 +1,13 @@
 from __future__ import annotations
 
 import copy
-from typing import Optional, Tuple, TypeVar, TYPE_CHECKING
+from typing import Optional, Tuple, Type, TypeVar, TYPE_CHECKING
+
+from render_order import RenderOrder
 
 if TYPE_CHECKING:
+    from components.ai import BaseAI
+    from components.fighter import Fighter
     from game_map import GameMap
 
 T = TypeVar('T', bound='Entity')
@@ -26,6 +30,7 @@ class Entity:
         color: Tuple[int, int, int] = (255, 255, 255),
         name: str = '<Unnamed>',
         blocks_movement: bool = False, # Describes if the entity can be moved
+        render_order: RenderOrder = RenderOrder.CORPSE
     ):
         # color is a tuple of 3 integers representing a RGB value
         self.x = x
@@ -34,6 +39,7 @@ class Entity:
         self.color = color
         self.name = name
         self.blocks_movement = blocks_movement
+        self.render_order = render_order
         if gamemap:
             #If gamemap isnt provided now, then it will be set later
             self.gamemap = gamemap
@@ -64,3 +70,36 @@ class Entity:
         # Some entities can move, like enemies or the player.
         self.x += dx
         self.y += dy
+
+
+class Actor(Entity):
+    def __init__(
+        self,
+        *,
+        x: int = 0,
+        y: int = 0,
+        char: str = "?",
+        color: Tuple[int, int, int] = (255, 255, 255),
+        name: str = "<Unnamed>",
+        ai_cls: Type[BaseAI],
+        fighter: Fighter
+    ):
+        super().__init__(
+            x=x,
+            y=y,
+            char=char,
+            color=color,
+            name=name,
+            blocks_movement=True,
+            render_order=RenderOrder.ACTOR,
+        )
+
+        self.ai: Optional[BaseAI] = ai_cls(self)
+
+        self.fighter = fighter
+        self.fighter.entity = self
+
+    @property
+    def is_alive(self) -> bool:
+        """Returns True as long as this actor can perform actions."""
+        return bool(self.ai)

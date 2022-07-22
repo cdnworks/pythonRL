@@ -26,6 +26,9 @@ def main() -> None:
     # Mobgen params
     max_monsters_per_room = 2
 
+    # Itemgen params
+    max_items_per_room = 2
+
     tileset = tcod.tileset.load_tilesheet(
         "dejavu10x10_gs_tc.png", 32, 8, tcod.tileset.CHARMAP_TCOD
     )
@@ -44,6 +47,7 @@ def main() -> None:
         map_width=map_width,
         map_height=map_height,
         max_monsters_per_room=max_monsters_per_room,
+        max_items_per_room=max_items_per_room,
         engine=engine
     )
 

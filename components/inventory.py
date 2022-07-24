@@ -20,6 +20,7 @@ class Inventory(BaseComponent):
         Removes an item from the inventory and restores it to the game map,
         at the player's current coordinates (drops at their feet basically.)
         '''
+        #This seems to destroy the item before placing it
         self.items.remove(item)
         item.place(self.parent.x, self.parent.y, self.gamemap)
 

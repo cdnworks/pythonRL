@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from re import L
 import traceback
 from setuptools import setup
 
@@ -8,6 +9,17 @@ import color
 import exceptions
 import input_handlers
 import setup_game
+
+
+
+def save_game(handler: input_handlers.BaseEventHandler, filename: str) -> None:
+    '''
+    If the current event handler has an active Engine, save it
+    '''
+    if isinstance(handler, input_handlers.EventHandler):
+        handler.engine.save_as(filename)
+        print("Game Saved.")
+
 
 
 def main() -> None:
@@ -51,10 +63,10 @@ def main() -> None:
         except exceptions.QuitWithoutSaving:
             raise
         except SystemExit:  # Save and quit.
-            # TODO: Add the save function here
+            save_game(handler, "savegame.sav")
             raise
         except BaseException:  # Save on any other unexpected exception.
-            # TODO: Add the save function here
+            save_game(handler, "savegame.sav")
             raise
 
 

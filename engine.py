@@ -14,7 +14,7 @@ from render_function import render_bar, render_names_at_mouse_location
 
 if TYPE_CHECKING:
     from entity import Actor
-    from game_map import GameMap
+    from game_map import GameMap, GameWorld
 
 
 class Engine:
@@ -24,6 +24,7 @@ class Engine:
     '''
 
     game_map: GameMap
+    game_world: GameWorld
 
     def __init__(self, player: Actor):
         self.message_log = MessageLog()

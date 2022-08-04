@@ -21,7 +21,7 @@ class Action:
         return self.entity.gamemap.engine
 
     def perform(self) -> None:
-        '''
+        """
         Performs this action with the objects needed to determine it's scope
 
         `self.engine` is the scope this action is being performed in
@@ -29,14 +29,14 @@ class Action:
         `self.entity` is the object performing the action.
 
         This method must be overriden by Action subclasses
-        '''
+        """
         raise NotImplementedError()
 
 
 class PickupAction(Action):
-    '''
+    """
     Pickup an item and add it to the inventory, if there is room for it.
-    '''
+    """
 
     def __init__(self, entity: Actor):
         super().__init__(entity)
@@ -63,10 +63,7 @@ class PickupAction(Action):
 
 class ItemAction(Action):
     def __init__(
-        self,
-        entity: Actor,
-        item: Item,
-        target_xy: Optional[Tuple[int, int]] = None
+        self, entity: Actor, item: Item, target_xy: Optional[Tuple[int, int]] = None
     ):
         super().__init__(entity)
         self.item = item
@@ -76,15 +73,15 @@ class ItemAction(Action):
 
     @property
     def target_actor(self) -> Optional[Actor]:
-        '''
+        """
         Return the actor at this action's destination
-        '''
+        """
         return self.engine.game_map.get_actor_at_location(*self.target_xy)
 
     def perform(self) -> None:
-        '''
+        """
         Invoke the item's ability, action will be given to provide context
-        '''
+        """
         if self.item.consumable:
             self.item.consumable.activate(self)
 
@@ -93,7 +90,7 @@ class DropItem(ItemAction):
     def perform(self) -> None:
         if self.entity.equipment.item_is_equipped(self.item):
             self.entity.equipment.toggle_equip(self.item)
-            
+
         self.entity.inventory.drop(self.item)
 
 
@@ -114,9 +111,9 @@ class WaitAction(Action):
 
 class TakeStairsAction(Action):
     def perform(self) -> None:
-        '''
+        """
         Take the stairs, if any exist at the entity's location.
-        '''
+        """
         if (self.entity.x, self.entity.y) == self.engine.game_map.downstairs_location:
             self.engine.game_world.generate_floor()
             self.engine.message_log.add_message(
@@ -151,6 +148,7 @@ class ActionWithDirection(Action):
     def perform(self) -> None:
         raise NotImplementedError()
 
+
 class MeleeAction(ActionWithDirection):
     def perform(self) -> None:
         target = self.target_actor
@@ -175,6 +173,7 @@ class MeleeAction(ActionWithDirection):
                 f"{attack_desc} but does no damage.", attack_color
             )
 
+
 class MovementAction(ActionWithDirection):
     def perform(self) -> None:
         dest_x, dest_y = self.dest_xy
@@ -182,7 +181,7 @@ class MovementAction(ActionWithDirection):
         if not self.engine.game_map.in_bounds(dest_x, dest_y):
             # Destination is out of bounds
             raise exceptions.Impossible("That way is blocked.")
-        if not self.engine.game_map.tiles['walkable'][dest_x, dest_y]:
+        if not self.engine.game_map.tiles["walkable"][dest_x, dest_y]:
             # Destination is out of bounds
             raise exceptions.Impossible("That way is blocked.")
         if self.engine.game_map.get_blocking_entity_at_location(dest_x, dest_y):

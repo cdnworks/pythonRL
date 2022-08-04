@@ -18,10 +18,10 @@ if TYPE_CHECKING:
 
 
 class Engine:
-    '''
+    """
     Class responsible for making the appropriate calls in response to game
     events and actions, and rendering the screen on a tcod console
-    '''
+    """
 
     game_map: GameMap
     game_world: GameWorld
@@ -37,16 +37,14 @@ class Engine:
                 try:
                     entity.ai.perform()
                 except exceptions.Impossible:
-                    pass # Ignore impossible action exceptions from AI
+                    pass  # Ignore impossible action exceptions from AI
 
     def update_fov(self) -> None:
-        '''
+        """
         Recompute the visible area based on the player's point of view
-        '''
+        """
         self.game_map.visible[:] = compute_fov(
-            self.game_map.tiles['transparent'],
-            (self.player.x, self.player.y),
-            radius=8
+            self.game_map.tiles["transparent"], (self.player.x, self.player.y), radius=8
         )
         # If a tile is 'visible', it should be added to 'explored'
         self.game_map.explored |= self.game_map.visible
@@ -74,9 +72,9 @@ class Engine:
         )
 
     def save_as(self, filename: str) -> None:
-        '''
+        """
         Save this Engine instance as a compressed file.
-        '''
+        """
         save_data = lzma.compress(pickle.dumps(self))
         with open(filename, "wb") as f:
             f.write(save_data)

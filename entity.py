@@ -17,27 +17,27 @@ if TYPE_CHECKING:
     from components.level import Level
     from game_map import GameMap
 
-T = TypeVar('T', bound='Entity')
+T = TypeVar("T", bound="Entity")
 
 
 class Entity:
-    '''
+    """
     Generic object to represent in-game objects/actors.
     i.e. players, enemies, items, etc
-    '''
+    """
 
     parent: Union[GameMap, Inventory]
 
     def __init__(
         self,
         parent: Optional[GameMap] = None,
-        x: int = 0, 
-        y: int = 0, 
-        char: str = '?', 
+        x: int = 0,
+        y: int = 0,
+        char: str = "?",
         color: Tuple[int, int, int] = (255, 255, 255),
-        name: str = '<Unnamed>',
-        blocks_movement: bool = False, # Describes if the entity can be moved
-        render_order: RenderOrder = RenderOrder.CORPSE
+        name: str = "<Unnamed>",
+        blocks_movement: bool = False,  # Describes if the entity can be moved
+        render_order: RenderOrder = RenderOrder.CORPSE,
     ):
         # color is a tuple of 3 integers representing a RGB value
         self.x = x
@@ -48,7 +48,7 @@ class Entity:
         self.blocks_movement = blocks_movement
         self.render_order = render_order
         if parent:
-            #If gamemap (parent) isnt provided now, then it will be set later
+            # If gamemap (parent) isnt provided now, then it will be set later
             self.parent = parent
             parent.entities.add(self)
 
@@ -57,9 +57,9 @@ class Entity:
         return self.parent.gamemap
 
     def spawn(self: T, gamemap: GameMap, x: int, y: int) -> T:
-        '''
+        """
         Spawn a copy of this instance at the given location
-        '''
+        """
         clone = copy.deepcopy(self)
         clone.x = x
         clone.y = y
@@ -78,9 +78,9 @@ class Entity:
             self.parent = gamemap
 
     def distance(self, x: int, y: int) -> float:
-        '''
+        """
         Returns the distance between the current entity and the given (x,y) coordinate
-        '''
+        """
         return math.sqrt((x - self.x) ** 2 + (y - self.y) ** 2)
 
     def move(self, dx: int, dy: int) -> None:
@@ -140,7 +140,7 @@ class Item(Entity):
         *,
         x: int = 0,
         y: int = 0,
-        char: str = '?',
+        char: str = "?",
         color: Tuple[int, int, int] = (255, 255, 255),
         name: str = "<Unnamed>",
         consumable: Optional[Consumable] = None,

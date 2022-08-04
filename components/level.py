@@ -17,7 +17,7 @@ class Level(BaseComponent):
         current_xp: int = 0,
         level_up_base: int = 0,
         level_up_factor: int = 150,
-        xp_given: int = 0
+        xp_given: int = 0,
     ):
 
         self.current_level = current_level
@@ -58,10 +58,14 @@ class Level(BaseComponent):
 
     def increase_power(self, amount: int = 1) -> None:
         self.parent.fighter.base_power += amount
-        self.engine.message_log.add_message(f"You feel stronger! (You gain {amount} power)")
+        self.engine.message_log.add_message(
+            f"You feel stronger! (You gain {amount} power)"
+        )
         self.increase_level()
 
     def increase_defense(self, amount: int = 1) -> None:
         self.parent.fighter.base_defense += amount
-        self.engine.message_log.add_message(f"Your movements are swifter! (You gain {amount} defense)")
+        self.engine.message_log.add_message(
+            f"Your movements are swifter! (You gain {amount} defense)"
+        )
         self.increase_level()

@@ -30,13 +30,10 @@ max_monsters_by_floor = [
 # floor spawn weights
 # key = floor, value = list of entities and odds of spawning
 item_chances: Dict[int, List[Tuple[Entity, int]]] = {
-    0: [(entity_factories.health_potion, 35),
-            (entity_factories.dagger, 10)],
+    0: [(entity_factories.health_potion, 35), (entity_factories.dagger, 10)],
     2: [(entity_factories.confusion_scroll, 35)],
-    4: [(entity_factories.lightning_scroll, 25),
-            (entity_factories.sword, 5)],
-    6: [(entity_factories.fireball_scroll, 25),
-            (entity_factories.chain_mail, 15)],
+    4: [(entity_factories.lightning_scroll, 25), (entity_factories.sword, 5)],
+    6: [(entity_factories.fireball_scroll, 25), (entity_factories.chain_mail, 15)],
 }
 
 enemy_chances: Dict[int, List[Tuple[Entity, int]]] = {
@@ -57,7 +54,7 @@ def get_max_value_for_floor(
             break
         else:
             current_value = value
-    
+
     return current_value
 
 
@@ -97,22 +94,22 @@ class RectangularRoom:
 
     @property
     def center(self) -> Tuple[int, int]:
-        center_x = int((self.x1 + self.x2) /2)
-        center_y = int((self.y1 + self.y2) /2)
+        center_x = int((self.x1 + self.x2) / 2)
+        center_y = int((self.y1 + self.y2) / 2)
 
         return center_x, center_y
 
     @property
     def inner(self) -> Tuple[slice, slice]:
-        '''
+        """
         Return the inner area of this room as a 2D array index
-        '''
+        """
         return slice(self.x1 + 1, self.x2), slice(self.y1 + 1, self.y2)
 
     def intersects(self, other: RectangularRoom) -> bool:
-        '''
+        """
         Return True if this room overlaps with another RectangularRoom.
-        '''
+        """
         return (
             self.x1 <= other.x2
             and self.x2 >= other.x1
@@ -122,7 +119,7 @@ class RectangularRoom:
 
 
 def place_entities(
-    room: RectangularRoom, 
+    room: RectangularRoom,
     dungeon: GameMap,
     floor_number: int,
 ) -> None:
@@ -153,12 +150,12 @@ def place_entities(
 def tunnel_between(
     start: Tuple[int, int], end: Tuple[int, int]
 ) -> Iterator[Tuple[int, int]]:
-    '''
+    """
     Return an L-shaped tunnel between two given points
-    '''
+    """
     x1, y1 = start
     x2, y2 = end
-    if random.random() < 0.5: # 50% chance in python's random class
+    if random.random() < 0.5:  # 50% chance in python's random class
         # Move horizontally, then vertically
         corner_x, corner_y = x2, y1
     else:
@@ -180,38 +177,38 @@ def generate_dungeon(
     map_height: int,
     engine: Engine,
 ) -> GameMap:
-    '''
+    """
     Generates a new dungeon map
-    '''
+    """
     player = engine.player
     dungeon = GameMap(engine, map_height, map_height, entities=[player])
 
     rooms: List[RectangularRoom] = []
 
-    center_of_last_room = (0,0)
+    center_of_last_room = (0, 0)
 
     for room in range(max_rooms):
         room_width = random.randint(room_min_size, room_max_size)
         room_height = random.randint(room_min_size, room_max_size)
 
         x = random.randint(0, dungeon.width - room_width - 1)
-        y = random.randint(0, dungeon.height - room_height -1)
+        y = random.randint(0, dungeon.height - room_height - 1)
 
         # "RectangularRoom" class makes rectangles easier to work with
         new_room = RectangularRoom(x, y, room_width, room_height)
 
         # Run through the other rooms and see if they intersect with this one
         if any(new_room.intersects(other_room) for other_room in rooms):
-            continue # Room intersects so go to the next attempt
+            continue  # Room intersects so go to the next attempt
         # If there are no intersections, then the room is valid
-        
-        #Dig out this room's inner area
+
+        # Dig out this room's inner area
         dungeon.tiles[new_room.inner] = tile_types.floor
 
         # The first room, where the player should spawn
         if len(rooms) == 0:
             player.place(*new_room.center, dungeon)
-        else: # Every other room
+        else:  # Every other room
             # Dig out a tunnel between this room and the previous one
             for x, y in tunnel_between(rooms[-1].center, new_room.center):
                 dungeon.tiles[x, y] = tile_types.floor

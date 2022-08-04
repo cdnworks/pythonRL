@@ -13,11 +13,7 @@ class Equipment(BaseComponent):
     parent: Actor
 
     # Initialize equipment slots, can be expanded later for more slots
-    def __init__(
-        self,
-        weapon: Optional[Item] = None,
-        armor: Optional[Item] = None
-    ):
+    def __init__(self, weapon: Optional[Item] = None, armor: Optional[Item] = None):
         self.weapon = weapon
         self.armor = armor
 
@@ -77,11 +73,7 @@ class Equipment(BaseComponent):
 
         setattr(self, slot, None)
 
-    def toggle_equip(
-        self,
-        equippable_item: Item,
-        add_message: bool = True
-    ) -> None:
+    def toggle_equip(self, equippable_item: Item, add_message: bool = True) -> None:
         if (
             equippable_item.equippable
             and equippable_item.equippable.equipment_type == EquipmentType.WEAPON

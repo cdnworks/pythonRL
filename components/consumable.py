@@ -10,7 +10,7 @@ from components.base_component import BaseComponent
 from exceptions import Impossible
 from input_handlers import (
     ActionOrHandler,
-    SingleRangedAttackHandler, 
+    SingleRangedAttackHandler,
     AreaRangedAttackHandler,
 )
 
@@ -33,9 +33,9 @@ class Consumable(BaseComponent):
         raise NotImplementedError()
 
     def consume(self) -> None:
-        '''
+        """
         Remove the consumed item from it's containing inventory
-        '''
+        """
         entity = self.parent
         inventory = entity.parent
         if isinstance(inventory, components.inventory.Inventory):
@@ -89,7 +89,9 @@ class ConfusionConsumable(Consumable):
             color.status_effect_applied,
         )
         target.ai = components.ai.ConfusedEnemy(
-            entity=target, previous_ai=target.ai, turns_remaining=self.number_of_turns,
+            entity=target,
+            previous_ai=target.ai,
+            turns_remaining=self.number_of_turns,
         )
         self.consume()
 
@@ -127,7 +129,7 @@ class FireballDamageConsumable(Consumable):
         if not targets_hit:
             raise Impossible("There are no targets in the radius.")
         self.consume()
-        
+
 
 class LightningDamageConsumable(Consumable):
     def __init__(self, damage: int, maximum_range: int):

@@ -48,11 +48,11 @@ class BaseAI(Action):
 
 
 class ConfusedEnemy(BaseAI):
-    '''
+    """
     A confused enemy will stumble around aimlessly for a given number of turns,
     then revert to it's original AI. If an actor occupies a tile it is randomly
     walking into, it will attack that actor.
-    '''
+    """
 
     def __init__(
         self,
@@ -76,22 +76,27 @@ class ConfusedEnemy(BaseAI):
             # Pick a random direction and move
             direction_x, direction_y = random.choice(
                 [
-                    (-1, -1), # Northwest
+                    (-1, -1),  # Northwest
                     (0, -1),  # North
                     (1, -1),  # Northeast
                     (-1, 0),  # West
-                    (1, 0),   # East
+                    (1, 0),  # East
                     (-1, 1),  # Southwest
-                    (0, 1),   # South
-                    (1, 1),   # Southeast
+                    (0, 1),  # South
+                    (1, 1),  # Southeast
                 ]
             )
 
             self.turns_remaining -= 1
-            
+
             # The confused actor will try to move or attack in the random direction
             # It is possible the actor will just bump into the wall, wasting a turn
-            return BumpAction(self.entity, direction_x, direction_y,).perform()
+            return BumpAction(
+                self.entity,
+                direction_x,
+                direction_y,
+            ).perform()
+
 
 class HostileEnemy(BaseAI):
     def __init__(self, entity: Actor):
@@ -113,7 +118,9 @@ class HostileEnemy(BaseAI):
         if self.path:
             dest_x, dest_y = self.path.pop(0)
             return MovementAction(
-                self.entity, dest_x - self.entity.x, dest_y - self.entity.y,
+                self.entity,
+                dest_x - self.entity.x,
+                dest_y - self.entity.y,
             ).perform()
 
         return WaitAction(self.entity).perform()

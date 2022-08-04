@@ -7,12 +7,7 @@ from typing import Callable, Optional, Tuple, TYPE_CHECKING, Union
 import tcod
 
 import actions
-from actions import (
-    Action,
-    BumpAction, 
-    PickupAction,
-    WaitAction
-)
+from actions import Action, BumpAction, PickupAction, WaitAction
 import color
 import exceptions
 
@@ -64,51 +59,52 @@ CONFIRM_KEYS = {
 
 
 ActionOrHandler = Union[Action, "BaseEventHandler"]
-'''
+"""
 An event handler return value which can trigger an action or switch active handlers
 
 If a handler is returned then it will become the active handler for future events.
 If an action is returned it will be attempted and if it's valid, then:
 MainGameEventHandler will become the active handler
-'''
+"""
+
 
 class BaseEventHandler(tcod.event.EventDispatch[ActionOrHandler]):
     def handle_events(self, event: tcod.event.Event) -> BaseEventHandler:
-        '''
+        """
         Handle an event and return the next active event handler.
-        '''
+        """
         state = self.dispatch(event)
         if isinstance(state, BaseEventHandler):
             return state
         assert not isinstance(state, Action), f"{self!r} can not handle actions."
         return self
-    
+
     def on_render(self, console: tcod.Console) -> None:
         raise NotImplementedError()
 
     def ev_quit(self, event: tcod.event.Quit) -> Optional[Action]:
-        raise SystemExit() 
+        raise SystemExit()
 
 
 class PopupMessage(BaseEventHandler):
-    '''
+    """
     Display a popup text window.
-    '''
+    """
 
     def __init__(self, parent_handler: BaseEventHandler, text: str):
         self.parent = parent_handler
         self.text = text
 
     def on_render(self, console: tcod.Console) -> None:
-        '''
+        """
         Render the parent and dim the result, then print the message on top.
-        '''
+        """
         self.parent.on_render(console)
         console.tiles_rgb["fg"] //= 8
         console.tiles_rgb["bg"] //= 8
 
         console.print(
-            console.width //2,
+            console.width // 2,
             console.height // 2,
             self.text,
             fg=color.white,
@@ -116,13 +112,10 @@ class PopupMessage(BaseEventHandler):
             alignment=tcod.CENTER,
         )
 
-    def ev_keydown(
-        self, 
-        event: tcod.event.KeyDown
-    ) -> Optional[BaseEventHandler]:
-        '''
+    def ev_keydown(self, event: tcod.event.KeyDown) -> Optional[BaseEventHandler]:
+        """
         Any key returns to the parent handler
-        '''
+        """
         return self.parent
 
 
@@ -131,9 +124,9 @@ class EventHandler(BaseEventHandler):
         self.engine = engine
 
     def handle_events(self, event: tcod.event.Event) -> BaseEventHandler:
-        '''
+        """
         Handle events for input handlers with an engine.
-        '''
+        """
         action_or_state = self.dispatch(event)
         if isinstance(action_or_state, BaseEventHandler):
             return action_or_state
@@ -143,8 +136,10 @@ class EventHandler(BaseEventHandler):
                 # The player was killed sometime during or after the action.
                 return GameOverEventHandler(self.engine)
             elif self.engine.player.level.requires_level_up:
-                return LevelUpEventHandler(self.engine) #Ignore all other events until the player levels up
-            return MainGameEventHandler(self.engine) # Return to the main handler
+                return LevelUpEventHandler(
+                    self.engine
+                )  # Ignore all other events until the player levels up
+            return MainGameEventHandler(self.engine)  # Return to the main handler
         return self
 
     def handle_action(self, action: Optional[Action]) -> bool:
@@ -177,9 +172,7 @@ class EventHandler(BaseEventHandler):
 class AskUserEventHandler(EventHandler):
     """Handles user input for actions which require special input."""
 
-    def ev_keydown(self, 
-        event: tcod.event.KeyDown
-    ) -> Optional[ActionOrHandler]:
+    def ev_keydown(self, event: tcod.event.KeyDown) -> Optional[ActionOrHandler]:
         """By default any key exits this input handler."""
         if event.sym in {  # Ignore modifier keys.
             tcod.event.K_LSHIFT,
@@ -193,8 +186,7 @@ class AskUserEventHandler(EventHandler):
         return self.on_exit()
 
     def ev_mousebuttondown(
-        self, 
-        event: tcod.event.MouseButtonDown
+        self, event: tcod.event.MouseButtonDown
     ) -> Optional[ActionOrHandler]:
         """By default any mouse click exits this input handler."""
         return self.on_exit()
@@ -377,9 +369,7 @@ class InventoryEventHandler(AskUserEventHandler):
         else:
             console.print(x + 1, y + 1, "(Empty)")
 
-    def ev_keydown(self, 
-        event: tcod.event.KeyDown
-    ) -> Optional[ActionOrHandler]:
+    def ev_keydown(self, event: tcod.event.KeyDown) -> Optional[ActionOrHandler]:
         player = self.engine.player
         key = event.sym
         index = key - tcod.event.K_a
@@ -424,32 +414,31 @@ class InventoryDropHandler(InventoryEventHandler):
 
 
 class SelectIndexHandler(AskUserEventHandler):
-    '''
+    """
     Handles asking the user for an index (target) on the map
-    '''
+    """
+
     def __init__(self, engine: Engine):
-        '''
+        """
         Sets the cursor to the player when the handler is constructed
-        '''
+        """
         super().__init__(engine)
         player = self.engine.player
         engine.mouse_location = player.x, player.y
 
     def on_render(self, console: tcod.Console) -> None:
-        '''
+        """
         Highlight the tile under the mouse cursor
-        '''
+        """
         super().on_render(console)
         x, y = self.engine.mouse_location
         console.tiles_rgb["bg"][x, y] = color.white
         console.tiles_rgb["fg"][x, y] = color.black
 
-    def ev_keydown(self, 
-        event: tcod.event.KeyDown
-    ) -> Optional[ActionOrHandler]:
-        '''
+    def ev_keydown(self, event: tcod.event.KeyDown) -> Optional[ActionOrHandler]:
+        """
         Check for key movement or confirmation keys
-        '''
+        """
         key = event.sym
         if key in MOVE_KEYS:
             modifier = 1  # Holding modifier keys will speed up key movement.
@@ -473,28 +462,28 @@ class SelectIndexHandler(AskUserEventHandler):
             return self.on_index_selected(*self.engine.mouse_location)
         return super().ev_keydown(event)
 
-    def ev_mousebuttondown(self, 
-        event: tcod.event.MouseButtonDown
+    def ev_mousebuttondown(
+        self, event: tcod.event.MouseButtonDown
     ) -> Optional[ActionOrHandler]:
-        '''
+        """
         Left click confirms a selection.
-        '''
+        """
         if self.engine.game_map.in_bounds(*event.tile):
             if event.button == 1:
                 return self.on_index_selected(*event.tile)
         return super().ev_mousebuttondown(event)
 
     def on_index_selected(self, x: int, y: int) -> Optional[ActionOrHandler]:
-        '''
+        """
         Called when an index is selected.
-        '''
-        raise NotImplementedError()       
+        """
+        raise NotImplementedError()
 
 
 class LookHandler(SelectIndexHandler):
-    '''
+    """
     Lets the player look around using the keyboard.
-    '''
+    """
 
     def on_index_selected(self, x: int, y: int) -> MainGameEventHandler:
         """Return to main handler."""
@@ -502,13 +491,12 @@ class LookHandler(SelectIndexHandler):
 
 
 class SingleRangedAttackHandler(SelectIndexHandler):
-    '''
+    """
     Handles targeting a single enemy. Only the enemy selected will be affected.
-    '''
+    """
+
     def __init__(
-        self,
-        engine: Engine,
-        callback: Callable[[Tuple[int, int]], Optional[Action]]
+        self, engine: Engine, callback: Callable[[Tuple[int, int]], Optional[Action]]
     ):
         super().__init__(engine)
 
@@ -519,10 +507,10 @@ class SingleRangedAttackHandler(SelectIndexHandler):
 
 
 class AreaRangedAttackHandler(SelectIndexHandler):
-    '''
-    Handles targeting an area within a given radius. 
+    """
+    Handles targeting an area within a given radius.
     Any entity within the area will be affected.
-    '''
+    """
 
     def __init__(
         self,
@@ -536,9 +524,9 @@ class AreaRangedAttackHandler(SelectIndexHandler):
         self.callback = callback
 
     def on_render(self, console: tcod.Console) -> None:
-        '''
+        """
         Highlight the tile under the cursor.
-        '''
+        """
         super().on_render(console)
 
         x, y = self.engine.mouse_location
@@ -547,8 +535,8 @@ class AreaRangedAttackHandler(SelectIndexHandler):
         console.draw_frame(
             x=x - self.radius - 1,
             y=y - self.radius - 1,
-            width=self.radius ** 2,
-            height=self.radius ** 2,
+            width=self.radius**2,
+            height=self.radius**2,
             fg=color.red,
             clear=False,
         )
@@ -558,13 +546,11 @@ class AreaRangedAttackHandler(SelectIndexHandler):
 
 
 class MainGameEventHandler(EventHandler):
-    def ev_keydown(self, 
-        event: tcod.event.KeyDown
-    ) -> Optional[ActionOrHandler]:
-        '''
+    def ev_keydown(self, event: tcod.event.KeyDown) -> Optional[ActionOrHandler]:
+        """
         Returns the appropriate Action type on key down, otherwise
         returns None
-        '''
+        """
         action: Optional[Action] = None
 
         key = event.sym
@@ -572,7 +558,7 @@ class MainGameEventHandler(EventHandler):
 
         player = self.engine.player
 
-        #Player attempts to take the stairs when '>' is pressed
+        # Player attempts to take the stairs when '>' is pressed
         if key == tcod.event.K_PERIOD and modifier & (
             tcod.event.KMOD_LSHIFT | tcod.event.KMOD_RSHIFT
         ):
@@ -661,9 +647,7 @@ class HistoryViewer(EventHandler):
         )
         log_console.blit(console, 3, 3)
 
-    def ev_keydown(self, 
-        event: tcod.event.KeyDown
-    ) -> Optional[MainGameEventHandler]:
+    def ev_keydown(self, event: tcod.event.KeyDown) -> Optional[MainGameEventHandler]:
         # Fancy conditional movement to make it feel right.
         if event.sym in CURSOR_Y_KEYS:
             adjust = CURSOR_Y_KEYS[event.sym]

@@ -1,6 +1,6 @@
-'''
+"""
 Handles the loading and initialization of game sessions.
-'''
+"""
 from __future__ import annotations
 
 import copy
@@ -23,16 +23,15 @@ background_image = tcod.image.load("menu_background.png")[:, :, :3]
 
 
 def new_game() -> Engine:
-    '''
+    """
     Return a brand new game session as an Engine instance
-    '''
+    """
     map_width = 80
     map_height = 43
 
     room_max_size = 10
     room_min_size = 6
     max_rooms = 30
-
 
     player = copy.deepcopy(entity_factories.player)
 
@@ -49,8 +48,7 @@ def new_game() -> Engine:
     engine.game_world.generate_floor()
 
     engine.message_log.add_message(
-        "Hello and welcome, adventurer, to yet another dungeon!", 
-        color.welcome_text
+        "Hello and welcome, adventurer, to yet another dungeon!", color.welcome_text
     )
 
     dagger = copy.deepcopy(entity_factories.dagger)
@@ -77,14 +75,14 @@ def load_game(filename: str) -> Engine:
 
 
 class MainMenu(input_handlers.BaseEventHandler):
-    '''
+    """
     Handle the main menu rendering and input.
-    '''
+    """
 
     def on_render(self, console: tcod.Console) -> None:
-        '''
+        """
         Render the main menu on a background image.
-        '''
+        """
         console.draw_semigraphics(background_image, 0, 0)
 
         console.print(
@@ -97,7 +95,7 @@ class MainMenu(input_handlers.BaseEventHandler):
 
         console.print(
             console.width // 2,
-            console.height -2,
+            console.height - 2,
             "By: CDNWorks",
             fg=color.menu_title,
             alignment=tcod.CENTER,

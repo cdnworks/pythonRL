@@ -10,19 +10,18 @@ if TYPE_CHECKING:
 
 class Inventory(BaseComponent):
     parent: Actor
-    
+
     def __init__(self, capacity: int):
         self.capacity = capacity
-        self.items: List[Item] = [] #initialize with no inventory
+        self.items: List[Item] = []  # initialize with no inventory
 
     def drop(self, item: Item) -> None:
-        '''
+        """
         Removes an item from the inventory and restores it to the game map,
         at the player's current coordinates (drops at their feet basically.)
-        '''
-        #This seems to destroy the item before placing it
+        """
+        # This seems to destroy the item before placing it
         self.items.remove(item)
         item.place(self.parent.x, self.parent.y, self.gamemap)
 
         self.engine.message_log.add_message(f"You dropped the {item.name}.")
-
